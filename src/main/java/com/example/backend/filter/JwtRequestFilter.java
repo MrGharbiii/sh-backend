@@ -1,6 +1,8 @@
 package com.example.backend.filter;
 
+import com.example.backend.service.AdminDetailsService;
 import com.example.backend.service.CustomUserDetailsService;
+import com.example.backend.service.UserDetailsService;
 import com.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,8 +20,12 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+
     @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private AdminDetailsService adminDetailsService;
+
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -38,8 +44,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-            if (jwtUtil.validateToken(jwt, userDetails)) {
+            UserDetails userDetails = null;
+            if (request.getRequestURI().startsWith("/admin")) {
+                userDetails = adminDetailsService.loadUserByUsername(username);
+            } else if (request.getRequestURI().startsWith("/user")) {
+                userDetails = userDetailsService.loadUserByUsername(username);
+            }
+
+            if (userDetails != null && jwtUtil.validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken

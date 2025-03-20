@@ -10,8 +10,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Document(collection = "users")
-public class User implements UserDetails {
+@Document(collection = "admins")
+public class Admin implements UserDetails {
     @Id
     private String id;
     private String username;

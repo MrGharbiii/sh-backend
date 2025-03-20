@@ -60,7 +60,6 @@ public class SecurityConfig {
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder
                 .userDetailsService(adminDetailsService).passwordEncoder(passwordEncoder())
-                .and()
                 .userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
         return authenticationManagerBuilder.build();
     }
