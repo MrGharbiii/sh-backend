@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -56,12 +60,19 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
+        AuthenticationManagerBuilder adminAuthenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder
-                .userDetailsService(adminDetailsService).passwordEncoder(passwordEncoder())
-                .and()
+        adminAuthenticationManagerBuilder
+                .userDetailsService(adminDetailsService).passwordEncoder(passwordEncoder());
+
+        AuthenticationManagerBuilder userAuthenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        userAuthenticationManagerBuilder
                 .userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
-        return authenticationManagerBuilder.build();
+
+        return new ProviderManager(Arrays.asList(
+                (AuthenticationProvider)  adminAuthenticationManagerBuilder.build(),
+                (AuthenticationProvider) userAuthenticationManagerBuilder.build()
+        ));
     }
 }
