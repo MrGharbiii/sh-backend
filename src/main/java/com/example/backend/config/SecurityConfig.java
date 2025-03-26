@@ -60,19 +60,18 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder adminAuthenticationManagerBuilder =
+        AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
-        adminAuthenticationManagerBuilder
-                .userDetailsService(adminDetailsService).passwordEncoder(passwordEncoder());
 
-        AuthenticationManagerBuilder userAuthenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        userAuthenticationManagerBuilder
-                .userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
+        // Configure both user details services
+        authenticationManagerBuilder
+                .userDetailsService(adminDetailsService)
+                .passwordEncoder(passwordEncoder());
 
-        return new ProviderManager(Arrays.asList(
-                (AuthenticationProvider)  adminAuthenticationManagerBuilder.build(),
-                (AuthenticationProvider) userAuthenticationManagerBuilder.build()
-        ));
+        authenticationManagerBuilder
+                .userDetailsService(customUserDetailsService)
+                .passwordEncoder(passwordEncoder());
+
+        return authenticationManagerBuilder.build();
     }
 }
