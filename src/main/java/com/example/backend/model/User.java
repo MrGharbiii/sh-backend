@@ -54,10 +54,11 @@ public class User implements UserDetails {
     }
 
     // UserDetails Methods
+    // In User.java
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Add this prefix
                 .collect(Collectors.toList());
     }
 
